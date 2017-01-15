@@ -7,6 +7,7 @@ import analyticsService.model.Analytics;
 import analyticsService.model.LocationModel;
 import analyticsService.model.Webshop;
 
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class ExampleData {
 
     }
 
-    public static void analytics() throws ParseException {
+    public static void analytics() throws ParseException, SQLException {
         LocationModel location0 = new LocationModel("Budapest", "Hungary", "HU");
         LocationModel location1 = new LocationModel("Miskolc", "Hungary", "HU");
         LocationModel location2 = new LocationModel("Kecskemet", "Hungary", "HU");
@@ -71,7 +72,7 @@ public class ExampleData {
         analytics.add(new Analytics(webshops.get(2), "efw2342345", start4, end4, location2, 5990f, "HUF"));
         analytics.add(new Analytics(webshops.get(3), "efwewef925", start5, end5, location3, 527990f, "HUF"));
         for (Analytics analytic : analytics) {
-            new AnalyticsDaoJDBC().add(analytic);
+            new AnalyticsDaoJDBC().addData(analytic);
         }
         for (String apiKey : apiKeys) {
             System.out.println(new AnalyticsDaoJDBC().findByWebshop(apiKey));

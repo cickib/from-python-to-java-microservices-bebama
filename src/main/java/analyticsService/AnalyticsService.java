@@ -1,7 +1,6 @@
 package analyticsService;
 
 import analyticsService.controller.APIController;
-import analyticsService.controller.LocationController;
 import analyticsService.dao.JDBC.AbstractDaoJDBC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +14,9 @@ import java.net.URISyntaxException;
 import static spark.Spark.*;
 import static spark.debug.DebugScreen.enableDebugScreen;
 
-public class Server {
-    private static final Logger logger = LoggerFactory.getLogger(Server.class);
+public class AnalyticsService {
+    private static final Logger logger = LoggerFactory.getLogger(AnalyticsService.class);
     private static final int PORT = 60000;
-
-
-    private static APIController controller;
 
     public static void main(String[] args) throws IOException {
 
@@ -47,8 +43,6 @@ public class Server {
             logger.error("Error while processing request", exception);
         });
 
-        controller = new APIController();
-
         // --- TEMPLATE ENGINE ---
         TemplateResolver templateResolver = new TemplateResolver();
         templateResolver.setTemplateMode("HTML5");
@@ -58,19 +52,19 @@ public class Server {
         templateResolver.setResourceResolver(new ClassLoaderResourceResolver());
 
         // --- ROUTES ---
-        get("/", controller::renderMain, new ThymeleafTemplateEngine(templateResolver));
-        get("/api", controller::api);
-        get("/api/visitor_count", controller::visitorCounter);
-        get("/api/visit_time_count", controller::visitTimeCounter);
-        get("/api/location_visits", controller::locationVisits);
-        get("stopTime", controller::stopSession);
-        get("/api/revenue", controller::countRevenue);
-        get("/startTime", controller::startSession);
-        post("/get_location", LocationController::getData);
+        get("/", new APIController()::renderMain, new ThymeleafTemplateEngine(templateResolver));
+        get("/api", new APIController()::api);
+        get("/api/visitors", new APIController()::visitorCount);
+        get("/api/times", new APIController()::visitTimeCount);
+        get("/api/locations", new APIController()::locationVisits);
+        get("/api/revenue", new APIController()::revenueCount);
+        get("/startTime", new APIController()::startSession);
+        get("/stopTime", new APIController()::stopSession);
+        post("/get_location", new APIController()::getData);
 
         enableDebugScreen();
 
-        logger.info("Server started on port " + PORT);
+        logger.info("AnalyticsService started on port " + PORT);
 
     }
 }

@@ -1,15 +1,22 @@
 package analyticsService.controller;
 
 import analyticsService.dao.JDBC.AnalyticsDaoJDBC;
+import analyticsService.dao.JDBC.LocationVisitorDaoJDBC;
 import analyticsService.dao.JDBC.WebshopDaoJDBC;
 import analyticsService.model.Analytics;
 import analyticsService.model.LocationModel;
+import analyticsService.model.LocationVisitor;
 import analyticsService.model.Webshop;
+import analyticsService.service.APIService;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 
+import java.security.InvalidParameterException;
+import java.security.spec.InvalidParameterSpecException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -18,121 +25,145 @@ import java.util.*;
 
 public class APIController {
 
-    private String sessionId;
-    private String webShopId = "1";
-    private Timestamp startTime;
-    private Timestamp endTime;
-    private Date start;
-    private Date stop;
+    private APIService apiService;
+    private Webshop webshop;
+    private Date start = null;
+    private Date end = null;
     private DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private Map<String, Integer> topLocations;
 
-    public String getWebShopId() {
-        return webShopId;
-    }
-
-    public String getSessionId() {
-        return sessionId;
+    public APIController(){
+        this.apiService = new APIService();
     }
 
     public ModelAndView renderMain(Request req, Response res) {
         Map<Object, Object> params = new HashMap<>();
-        startSession(req, res);
         return new ModelAndView(params, "time_location");
     }
 
-    private void getTimes(Request req, Response res) throws ParseException {
-        start = customDateParser(req.queryParams("startTime"));
-        stop = customDateParser(req.queryParams("endTime"));
-    }
-
-    public String stopSession(Request req, Response res) {
+    public Response stopSession(Request req, Response res) throws SQLException {
         String time = req.queryParams("time");
         Date date = new Date(Long.parseLong(time));
-        this.endTime = convertToTimeStamp(date);
-        analytics(req, res);
-        return "";
+        new AnalyticsDaoJDBC().addData(new Analytics(null, req.session().id(), null, convertToTimeStamp(date), null, null, null));
+        return res;
     }
 
-    public String startSession(Request req, Response res) {
-        sessionId = req.session().id();
-        Date date = new Date();
-        this.startTime = convertToTimeStamp(date);
-        return "";
+    public Response startSession(Request req, Response res) throws SQLException {
+        Webshop webshop = new WebshopDaoJDBC().findByApyKey(req.queryParams("apikey"));
+        String time = req.queryParams("time");
+        Date date = new Date(Long.parseLong(time));
+        new AnalyticsDaoJDBC().addData(new Analytics(webshop, req.session().id(), convertToTimeStamp(date), convertToTimeStamp(date), null, null, null));
+        return res;
     }
 
-    public void analytics(Request req, Response res) {
-        LocationModel location = LocationModel.getAllLocations().get(0);
-        float amount = 10;
-        Currency currency = Currency.getInstance(Locale.US);
-        Analytics model = new Analytics(new WebshopDaoJDBC().findByApyKey(getWebShopId()), getSessionId(), this.startTime, this.endTime, location, amount, String.valueOf(currency));
+    public Response getData(Request req, Response res) throws org.json.simple.parser.ParseException, SQLException {
+        JSONObject jsonLocation = (JSONObject) new JSONParser().parse(req.queryParams().iterator().next());
+        LocationModel location = new LocationModel(jsonLocation.get("city").toString(),
+                jsonLocation.get("country").toString(), jsonLocation.get("countryCode").toString());
+        Webshop webshop = new WebshopDaoJDBC().findByApyKey(req.queryParams("apikey"));
+        new AnalyticsDaoJDBC().addData(new Analytics(webshop, req.session().id(), null, null, location, null, null));
+        return res;
+    }
+
+    public String api(Request req, Response res) {
         try {
-            new AnalyticsDaoJDBC().add(model);
+            checkParams(req);
         } catch (Exception e) {
-            e.printStackTrace();
+            return convertMapToJSONString(new HashMap<String, String>(){{put("error", e.getMessage());}});
         }
+        this.apiService.visitorCount(collectData(req));
+        this.apiService.visitTimeCount(collectData(req));
+        this.apiService.mostVisitsFrom(collectLocation(req));
+        this.apiService.revenueCount(collectData(req));
+        return convertMapToJSONString(this.apiService.getParams());
     }
 
-    public String api(Request req, Response res) throws ParseException {
-        webShopId = req.queryParams("webshopId");
-        topLocations = LocationVisitorController.topLocations(req.queryParams("webshopId"));
-        int highestVisitorCount = Collections.max(topLocations.values());
-        String topLocation = topLocations.entrySet()
-                .stream()
-                .filter(entry -> Objects.equals(entry.getValue(), highestVisitorCount))
-                .map(Map.Entry::getKey).findFirst().orElse(null);
-        Map<String, Object> analytic = new HashMap<>();
-        analytic.put("visitors", VisitorCountController.totalVisitors(webShopId));
-        analytic.put("average_visit_time", VisitTimeController.averageVisitTime(webShopId));
-        analytic.put("most_visited_from", topLocation);
-        analytic.put("revenue", RevenueController.totalRevenue(webShopId));
-        return convertMapToJSONString(analytic);
+    public String visitorCount(Request req, Response res) {
+        try {
+            checkParams(req);
+        } catch (Exception e) {
+            return convertMapToJSONString(new HashMap<String, String>(){{put("error", e.getMessage());}});
+        }
+        this.apiService.visitorCount(collectData(req));
+        return convertMapToJSONString(this.apiService.getParams());
+
     }
 
-    public String visitorCounter(Request req, Response res) throws ParseException {
-        webShopId = req.queryParams("webshopId");
-        sessionId = req.queryParams("sessionId");
-        Map<String, Integer> counter = new HashMap<>();
-        if (req.queryParams().size() == 3) {
-            getTimes(req, res);
-            counter.put("visitors", VisitorCountController.visitorsByTime(webShopId, convertToTimeStamp(start), convertToTimeStamp(stop)));
+    public String visitTimeCount(Request req, Response res) {
+        try {
+            checkParams(req);
+        } catch (Exception e) {
+            return convertMapToJSONString(new HashMap<String, String>(){{put("error", e.getMessage());}});
+        }
+        this.apiService.visitTimeCount(collectData(req));
+        return convertMapToJSONString(this.apiService.getParams());
+    }
+
+    public String locationVisits(Request req, Response res) {
+        try {
+            checkParams(req);
+        } catch (Exception e) {
+            return convertMapToJSONString(new HashMap<String, String>(){{put("error", e.getMessage());}});
+        }
+        this.apiService.locationVisits(collectLocation(req));
+        return convertMapToJSONString(this.apiService.getParams());
+    }
+
+    public String revenueCount(Request req, Response res) {
+        try {
+            checkParams(req);
+        } catch (Exception e) {
+            return convertMapToJSONString(new HashMap<String, String>(){{put("error", e.getMessage());}});
+        }
+        this.apiService.revenueCount(collectData(req));
+        return convertMapToJSONString(this.apiService.getParams());
+    }
+
+    private void checkParams(Request req) throws InvalidParameterSpecException {
+        this.webshop = new WebshopDaoJDBC().findByApyKey(req.queryParams("apikey"));
+        if (req.queryParams("apikey") == null) {
+            throw new InvalidParameterSpecException("ApiKey is required");
+        } else if (this.webshop == null) {
+            throw new InvalidParameterException("Invalid apiKey");
+        } else if (req.queryParams().size() == 3){
+            if (req.queryParams("start") == null || req.queryParams("end") == null){
+                throw new InvalidParameterSpecException("Invalid parameters");
+            } else {
+                try {
+                    this.start = customDateParser(req.queryParams("start"));
+                } catch (ParseException e) {
+                    throw new InvalidParameterException("Invalid start parameter");
+                }
+                try {
+                    this.end = customDateParser(req.queryParams("end"));
+                } catch (ParseException e) {
+                    throw new InvalidParameterException("Invalid end parameter");
+                }
+            }
+        } else if (req.queryParams().size() != 1 && req.queryParams().size() != 3){
+            throw new InvalidParameterSpecException("Invalid number of parameters");
+        }
+        this.apiService.setParams(this.webshop.getName(), this.start, this.end);
+    }
+
+    private List<Analytics> collectData(Request req) {
+        if(this.start == null || this.end == null) {
+            return new AnalyticsDaoJDBC().findByWebshop(req.queryParams("apikey"));
         } else {
-            counter.put("visitors", VisitorCountController.totalVisitors(webShopId));
+            return new AnalyticsDaoJDBC().findByWebshopTime(
+                    req.queryParams("apikey"),
+                    convertToTimeStamp(this.start),
+                    convertToTimeStamp(this.end));
         }
-        return convertMapToJSONString(counter);
     }
 
-    public String visitTimeCounter(Request req, Response res) throws ParseException {
-        webShopId = req.queryParams("webshopId");
-        sessionId = req.queryParams("sessionId");
-        if (req.queryParams().size() == 3) {
-            getTimes(req, res);
-            return convertMapToJSONString(VisitTimeController.averageVisitTimeByTime(webShopId, convertToTimeStamp(start), convertToTimeStamp(stop)));
+    private List<LocationVisitor> collectLocation(Request req) {
+        if(this.start == null || this.end == null) {
+            return new LocationVisitorDaoJDBC().locationsByWebshop(req.queryParams("apikey"));
         } else {
-            return convertMapToJSONString(VisitTimeController.averageVisitTime(webShopId));
+            return new LocationVisitorDaoJDBC().locationsByWebshopTime(req.queryParams("apikey"),
+                    convertToTimeStamp(this.start),
+                    convertToTimeStamp(this.end));
         }
-    }
-
-    public String locationVisits(Request req, Response res) throws ParseException {
-        sessionId = req.queryParams("sessionId");
-        webShopId = req.queryParams("webshopId");
-        if (req.queryParams().size() == 3) {
-            getTimes(req, res);
-            return convertMapToJSONString(LocationVisitorController.topLocationsByTime(webShopId, convertToTimeStamp(start), convertToTimeStamp(stop)));
-        } else return convertMapToJSONString(LocationVisitorController.topLocations(webShopId));
-    }
-
-    public String countRevenue(Request req, Response res) throws ParseException {
-        sessionId = req.queryParams("sessionId");
-        webShopId = req.queryParams("webshopId");
-        Map<String, Float> revenue = new HashMap<>();
-        if (req.queryParams().size() == 3) {
-            getTimes(req, res);
-            revenue.put("revenue", RevenueController.revenueByTime(webShopId, convertToTimeStamp(start), convertToTimeStamp(stop)));
-        } else {
-            revenue.put("revenue", RevenueController.totalRevenue(webShopId));
-        }
-        return convertMapToJSONString(revenue);
     }
 
     private Date customDateParser(String inputDate) throws ParseException {

@@ -2,8 +2,6 @@ package analyticsService.dao.JDBC;
 
 import analyticsService.SaltHasher;
 import analyticsService.dao.WebshopDao;
-import analyticsService.model.Analytics;
-import analyticsService.model.LocationModel;
 import analyticsService.model.Webshop;
 
 import java.sql.*;
@@ -33,7 +31,7 @@ public class WebshopDaoJDBC extends AbstractDaoJDBC implements WebshopDao {
             while (rs.next()) {
                 result = new Webshop(rs.getString("ws_name"));
                 result.setId(rs.getInt("ws_id"));
-                result.setAnalyticsList(new AnalyticsDaoJDBC().findByWebshop(rs.getString("apikey")));
+                result.setAnalyticsList(new AnalyticsDaoJDBC().findByWebshop(apiKey));
             }
         } catch (SQLException e) {
             e.printStackTrace();

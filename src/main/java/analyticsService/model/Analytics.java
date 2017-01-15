@@ -21,7 +21,7 @@ public class Analytics {
         this.endTime = endTime;
         this.location = location;
         this.amount = amount;
-        this.currency = currency == null ? null : Currency.getInstance(currency);
+        this.currency = Currency.getInstance("HUF");
     }
 
     public Integer getId() {
@@ -89,7 +89,7 @@ public class Analytics {
     }
 
     public String toString() {
-        return "webshop: " + this.webshop + "\n" +
+        return ": " + this.webshop + "\n" +
                 "session: " + this.sessionId + "\n" +
                 "start: " + this.startTime + "\n" +
                 "end: " + this.endTime + "\n" +
