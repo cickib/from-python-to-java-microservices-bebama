@@ -25,14 +25,10 @@ public class WebshopDaoJDBC extends AbstractDaoJDBC implements WebshopDao {
 
     @Override
     public Webshop findByApyKey(String apiKey) {
-       return getWebshop("SELECT * FROM webshop WHERE apikey ='" + apiKey + "';");
-    }
-
-    private Webshop getWebshop(String query){
         Webshop result = null;
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(query);
+             ResultSet rs = statement.executeQuery("SELECT * FROM webshop WHERE apikey ='" + apiKey + "';");
         ) {
             while (rs.next()) {
                 result = new Webshop(rs.getString("ws_name"));
@@ -44,24 +40,4 @@ public class WebshopDaoJDBC extends AbstractDaoJDBC implements WebshopDao {
         }
         return result;
     }
-
-//    public static void main(String[] args) throws Exception {
-//        AbstractDaoJDBC.setConnection("connection.properties");
-//        Webshop webshop = new Webshop("codecoolwebshop");
-//        new WebshopDaoJDBC().add(webshop);
-//        String apiKey = SaltHasher.hashString(webshop.getName());
-//        webshop = new WebshopDaoJDBC().findByApyKey(apiKey);
-//        System.out.println(new WebshopDaoJDBC().findByApyKey(apiKey));
-//        LocationModel location = new LocationModel("Budapes", "Hungary", "HU");
-//        Analytics analytics = new Analytics(
-//                webshop, "efwefweefw",
-//                new Timestamp(System.currentTimeMillis()),
-//                new Timestamp(System.currentTimeMillis()),
-//                location,
-//                2345.3525f,
-//                "HUF");
-//        new AnalyticsDaoJDBC().add(analytics);
-//        System.out.println(new AnalyticsDaoJDBC().findByWebshop(apiKey).get(0));
-//        System.out.println(new LocationVisitorDaoJDBC().locationsByWebshop(apiKey));
-//    }
 }
