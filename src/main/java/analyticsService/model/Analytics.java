@@ -1,7 +1,6 @@
 package analyticsService.model;
 
 import java.sql.Timestamp;
-import java.util.Currency;
 
 public class Analytics {
 
@@ -11,17 +10,13 @@ public class Analytics {
     private Timestamp startTime;
     private Timestamp endTime;
     private LocationModel location;
-    private Float amount;
-    private Currency currency;
 
-    public Analytics(Webshop webshop, String sessionId, Timestamp startTime, Timestamp endTime, LocationModel location, Float amount, String currency) {
+    public Analytics(Webshop webshop, String sessionId, Timestamp startTime, Timestamp endTime, LocationModel location) {
         this.webshop = webshop;
         this.sessionId = sessionId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.location = location;
-        this.amount = amount;
-        this.currency = Currency.getInstance("HUF");
     }
 
     public Integer getId() {
@@ -72,30 +67,12 @@ public class Analytics {
         this.location = location;
     }
 
-    public Float getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Float amount) {
-        this.amount = amount;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
     public String toString() {
         return ": " + this.webshop + "\n" +
                 "session: " + this.sessionId + "\n" +
                 "start: " + this.startTime + "\n" +
                 "end: " + this.endTime + "\n" +
-                "location: " + this.location + "\n" +
-                "amount: " + this.amount + "\n" +
-                "currency: " + this.currency;
+                "location: " + this.location;
     }
 
     public Integer secondsSpent() {

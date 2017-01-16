@@ -65,12 +65,12 @@ public class ExampleData {
         Timestamp end4 = new Timestamp(dateFormat.parse("2016-12-25 23:09:51").getTime());
         Timestamp end5 = new Timestamp(dateFormat.parse("2017-01-13 22:14:33").getTime());
 
-        analytics.add(new Analytics(webshops.get(0), "efwefweefw", start0, end0, location0, 9990f, "HUF"));
-        analytics.add(new Analytics(webshops.get(0), "ouifh23234", start1, end1, location0, 239900f, "HUF"));
-        analytics.add(new Analytics(webshops.get(0), "qwdjqiwdjo", start2, end2, location1, 119900f, "HUF"));
-        analytics.add(new Analytics(webshops.get(1), "ewhfioh23i", start3, end3, location0, 18990f, "HUF"));
-        analytics.add(new Analytics(webshops.get(2), "efw2342345", start4, end4, location2, 5990f, "HUF"));
-        analytics.add(new Analytics(webshops.get(3), "efwewef925", start5, end5, location3, 527990f, "HUF"));
+        analytics.add(new Analytics(webshops.get(0), "efwefweefw", start0, end0, location0));
+        analytics.add(new Analytics(webshops.get(0), "ouifh23234", start1, end1, location0));
+        analytics.add(new Analytics(webshops.get(0), "qwdjqiwdjo", start2, end2, location1));
+        analytics.add(new Analytics(webshops.get(1), "ewhfioh23i", start3, end3, location0));
+        analytics.add(new Analytics(webshops.get(2), "efw2342345", start4, end4, location2));
+        analytics.add(new Analytics(webshops.get(3), "efwewef925", start5, end5, location3));
         for (Analytics analytic : analytics) {
             new AnalyticsDaoJDBC().addData(analytic);
         }

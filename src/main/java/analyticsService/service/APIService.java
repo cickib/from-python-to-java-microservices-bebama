@@ -33,13 +33,12 @@ public class APIService {
     }
 
     public void mostVisitsFrom(List<LocationVisitor> locations) {
-        LocationVisitor location = Collections.max(locations, Comparator.comparing(LocationVisitor::getVisitors));
-        this.params.put("most_visited_from", location.getLocation().toString());
-    }
-
-    public void revenueCount(List<Analytics> purchases){
-        Double avenue = purchases.stream().map(Analytics::getAmount).mapToDouble(Float::floatValue).sum();
-        this.params.put("revenue", avenue.floatValue());
+        try {
+            LocationVisitor location = Collections.max(locations, Comparator.comparing(LocationVisitor::getVisitors));
+            this.params.put("most_visited_from", location.getLocation().toString());
+        } catch (Exception e) {
+            this.params.put("most_visited_from", "No visitors yet");
+        }
     }
 
     public void visitTimeCount(List<Analytics> visits) {

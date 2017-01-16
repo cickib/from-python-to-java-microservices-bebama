@@ -1,10 +1,6 @@
-/**
- * Created by cickib on 2017.01.09..
- */
-
 // noLocation() called twice:
-    // when the browser doesn't support geolocating
-    // when it does, but an error/permission issue occured
+// when the browser doesn't support geolocating
+// when it does, but an error/permission issue occured
 function getCoords() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(getCity, noLocation);
@@ -16,7 +12,7 @@ function getCoords() {
 function noLocation() {
     $.ajax({
             type: "POST",
-            url: "/get_location?apikey=" + apikey,
+            url: "http://localhost:60000/get_location?apikey=" + apikey,
             data: JSON.stringify({"city": "N/A", "country": "N/A", "countryCode": "N/A"})
         }
     );
@@ -54,7 +50,7 @@ function getCity(position) {
 function sendLocationData(city, country, countryCode) {
     $.ajax({
             type: "POST",
-            url: "/get_location",
+            url: "http://localhost:60000/get_location",
             data: JSON.stringify({"city": city, "country": country, "countryCode": countryCode})
         }
     );

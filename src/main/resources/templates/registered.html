@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="author" content="Bebama"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>Bebamanalytics</title>
+</head>
+<body>
+<div class="jumbotron text-center">
+    <h2>Bebamanalytics</h2>
+</div>
+
+<div class="container-fluid">
+    <p><strong>copy the following code to your index template to provide our service with the necessary data:</strong></p>
+    <p th:text="'&#60;script&#62;var apiKey=&#34;'+${webshop.apikey}+'&#34;&#60;/script&#62;'"></p>
+    <p>&#60;script src=&#34;http://localhost:60000/js/locate_visitor.js&#34;&#62;&#60;/script&#62;</p>
+    <p>&#60;script src=&#34;http://localhost:60000/js/time_counter.js&#34;&#62;&#60;/script&#62;</p>
+    <a href="http://localhost:60000/"><input type="button" value="back" /></a>
+</div>
+</body>
+</html>

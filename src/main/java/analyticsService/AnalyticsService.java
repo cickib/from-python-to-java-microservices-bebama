@@ -1,6 +1,8 @@
 package analyticsService;
 
-import analyticsService.controller.APIController;
+import analyticsService.controller.DataController;
+import analyticsService.controller.RenderController;
+import analyticsService.controller.TrackingController;
 import analyticsService.dao.JDBC.AbstractDaoJDBC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import spark.template.thymeleaf.ThymeleafTemplateEngine;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 
 import static spark.Spark.*;
 import static spark.debug.DebugScreen.enableDebugScreen;
@@ -37,6 +40,12 @@ public class AnalyticsService {
             logger.error("Error while processing request", exception);
         });
 
+        exception(SQLException.class, (exception, request, response) -> {
+            response.status(500);
+            response.body(String.format("SQL error, maybe DB server disconnected? : %s", exception.getMessage()));
+            logger.error("Error while processing request", exception);
+        });
+
         exception(Exception.class, (exception, request, response) -> {
             response.status(500);
             response.body(String.format("Unexpected error occurred: %s", exception.getMessage()));
@@ -52,15 +61,19 @@ public class AnalyticsService {
         templateResolver.setResourceResolver(new ClassLoaderResourceResolver());
 
         // --- ROUTES ---
-        get("/", new APIController()::renderMain, new ThymeleafTemplateEngine(templateResolver));
-        get("/api", new APIController()::api);
-        get("/api/visitors", new APIController()::visitorCount);
-        get("/api/times", new APIController()::visitTimeCount);
-        get("/api/locations", new APIController()::locationVisits);
-        get("/api/revenue", new APIController()::revenueCount);
-        get("/startTime", new APIController()::startSession);
-        get("/stopTime", new APIController()::stopSession);
-        post("/get_location", new APIController()::getData);
+        get("/api", new DataController()::api);
+        get("/api/visitors", new DataController()::visitorCount);
+        get("/api/times", new DataController()::visitTimeCount);
+        get("/api/locations", new DataController()::locationVisits);
+        get("/startTime", new TrackingController()::startSession);
+        get("/stopTime", new TrackingController()::stopSession);
+        post("/get_location", new TrackingController()::getData);
+        get("/webshop", new RenderController()::renderWebshop, new ThymeleafTemplateEngine(templateResolver));
+        get("/register", new RenderController()::renderRegister, new ThymeleafTemplateEngine(templateResolver));
+        post("/register", new TrackingController()::registerWebshop);
+        get("registered", new RenderController()::renderRegistered, new ThymeleafTemplateEngine(templateResolver));
+        get("/", new RenderController()::renderMain, new ThymeleafTemplateEngine(templateResolver));
+
 
         enableDebugScreen();
 

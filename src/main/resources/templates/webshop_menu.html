@@ -15,15 +15,13 @@
     </div>
 
     <div class="container-fluid">
-        <div th:each="webshop,iterStat : ${webshops}">
-            <a th:href="'http://localhost:60000/webshop?apikey='+${webshop.apikey}"><p th:text="${webshop.name}"></p></a>
-        </div>
-        <a href="http://localhost:60000/register"><input type="button" value="register" /></a>
+        <p th:text="'webshop: '+${webshop.name}"></p>
+        <p th:text="'total visitors: '+${analytics.visitors}"></p>
+        <p th:text="'average visit time: '+${analytics.times.average_time_spent}"></p>
+        <p th:text="'minimal visit time: '+${analytics.times.min_time_spent}"></p>
+        <p th:text="'maximum visit time: '+${analytics.times.max_time_spent}"></p>
+        <p th:text="'most visited from: '+${analytics.most_visited_from}"></p>
+        <a href="http://localhost:60000/"><input type="button" value="back" /></a>
     </div>
-    <script>var apiKey="58EDB2AAA3E1D2D67210949271F53DE68DBE4A2EFF64991F253F778DF0CECD20"</script>
-
-    <script src="http://localhost:60000/js/locate_visitor.js"></script>
-
-    <script src="http://localhost:60000/js/time_counter.js"></script>
 </body>
 </html>
