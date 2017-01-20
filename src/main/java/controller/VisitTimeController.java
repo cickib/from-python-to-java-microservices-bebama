@@ -9,12 +9,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+/**
+ * Gets stored visit time data of a webshop.
+ */
 public class VisitTimeController {
 
+    /**
+     * Shows the min, max, and average visit time a visitor spends in the webshop.
+     * @param webshop id of the webshop
+     * @return Map of min, max, and average visit time.
+     */
     public static Map<String, String> averageVisitTime(Integer webshop) {
         return countAverage(new AnalyticsDaoJDBC().findByWebshop(webshop));
     }
 
+    /**
+     * Shows the min, max, and average visit time a visitor spends in the webshop, in the requested time frame.
+     * @param webshop id of the webshop
+     * @param startTime Timestamp of the start of the session
+     * @param endTime Timestamp of the end of the session
+     * @return Map of min, max, and average visit time.
+     */
     public static Map<String, String> averageVisitTimeByTime(Integer webshop, Timestamp startTime, Timestamp endTime) {
         return countAverage(new AnalyticsDaoJDBC().findByWebshopTime(webshop, startTime, endTime));
     }

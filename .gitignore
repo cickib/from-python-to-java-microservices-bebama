@@ -21,5 +21,6 @@ log/
 hs_err_pid*
 
 from-python-to-java-microservices-bebama.iml
+bebama-services.iml
 
 /src/main/resources/connection.properties

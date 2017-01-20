@@ -5,6 +5,11 @@ import java.net.URISyntaxException;
 /**
  * Created by makaimark on 2017.01.11..
  */
+
+/**
+ * Irrelevant class for test purposes.
+ * To be removed.
+ */
 public class MainTest {
 
     public static void main(String[] args) {

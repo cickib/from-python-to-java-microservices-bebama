@@ -13,16 +13,29 @@ import java.util.Properties;
  * Created by cickib on 2017.01.09..
  */
 
+/**
+ * Defines db connection related methods for classes that extends it.
+ */
 public abstract class AbstractDaoJDBC {
 
     private static String DBURL;
     private static String DB_USER;
     private static String DB_PASSWORD;
 
+    /**
+     * Gets the db connection to use with further db related actions.
+     * @return the specific db connection
+     * @throws SQLException when a database access error or other errors occur.
+     */
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DBURL, DB_USER, DB_PASSWORD);
     }
 
+    /**
+     * Sets up the connection with the db.
+     * @param config connection data(dburl, user, password)
+     * @throws IOException when failed or interrupted I/O operations occur.
+     */
     public static void setConnection(String config) throws IOException {
         Properties pro = new Properties();
         FileInputStream in = new FileInputStream("./src/main/resources/" + config);
@@ -34,6 +47,11 @@ public abstract class AbstractDaoJDBC {
         DB_PASSWORD = pro.getProperty("DB_PASSWORD");
     }
 
+    /**
+     * A single String digested into a LocationModel to get useful location data about a visit.
+     * @param location String from the Server
+     * @return LocationModel instantiated with the data from the location String.
+     */
     protected static LocationModel stringToLocation(String location) {
         String[] details = location.split(",");
         return new LocationModel(details[0],
