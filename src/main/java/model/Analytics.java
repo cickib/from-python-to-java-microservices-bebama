@@ -3,6 +3,9 @@ package model;
 import java.sql.Timestamp;
 import java.util.Currency;
 
+/**
+ * Stores all analytic data of a session in a webshop.
+ */
 public class Analytics {
 
     private Integer id;
@@ -99,6 +102,10 @@ public class Analytics {
                 "currency: " + this.currency;
     }
 
+    /**
+     * Calculates the difference between two Timestamp objects.
+     * @return difference in seconds.
+     */
     public Integer secondsSpent() {
         return Math.toIntExact((this.getEndTime().getTime()-this.getStartTime().getTime()) / 1000);
     }

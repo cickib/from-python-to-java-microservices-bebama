@@ -7,8 +7,14 @@ import java.util.Properties;
  * Created by cickib on 2017.01.09..
  */
 
+/**
+ * Creates a file storing db connection data.
+ */
 public class PropertiesConfig {
 
+    /**
+     * Sets up the necessary db properties.
+     */
     public static void config() {
 
         Properties prop = new Properties();

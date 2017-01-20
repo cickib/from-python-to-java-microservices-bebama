@@ -13,6 +13,9 @@ import java.net.URISyntaxException;
 import static spark.Spark.*;
 import static spark.debug.DebugScreen.enableDebugScreen;
 
+/**
+ * The engine behind the microservice.
+ */
 public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
     private static final int PORT = 60000;

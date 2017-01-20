@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * Stores location and visitor count data bundled together.
+ */
 public class LocationVisitor {
 
     private LocationModel location;
